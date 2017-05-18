@@ -32,6 +32,8 @@ npm install
 ```
 npm start
 ```
+Navigate with your browser to `http://0.0.0.0:5000` to see the app in action.
+
 Notice that will will run `python app.py` and `webpack --watch` *in parallel*.
 You can also run the two commands above manually in two separate tabs.
 
