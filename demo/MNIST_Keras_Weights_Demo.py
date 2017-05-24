@@ -10,13 +10,24 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import RMSprop
 from keras.callbacks import ModelCheckpoint
+import os
+import errno
 
+
+def make_log_dir(path):
+    try:
+        os.makedirs(path)
+        print("Created folder " + path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+    return
 
 batch_size = 128
 num_classes = 10
 epochs = 20
-#Where to export the weight to
-weights_path = "/tmp/weights.hdf5"
+# Where to export the weight to
+log_dir = "/tmp/VisualAnalytics/"
 
 # the data, shuffled and split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -47,9 +58,12 @@ model.compile(loss='categorical_crossentropy',
               optimizer=RMSprop(),
               metrics=['accuracy'])
 
+#Make sure log_dir exists
+make_log_dir(log_dir)
+
 # Saves the weights to desired path
 checkpointer = ModelCheckpoint(filepath=
-    "/tmp/VisualAnalytics/weights{epoch:02d}.hdf5", verbose=1,
+    log_dir + "weights{epoch:02d}.hdf5", verbose=1,
     save_best_only=False, save_weights_only=True)
 
 history = model.fit(x_train, y_train,

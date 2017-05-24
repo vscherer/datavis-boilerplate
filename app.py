@@ -1,9 +1,11 @@
 from flask import Flask, render_template
 import pandas as pd
 import numpy as np
+import h5py
 
 # Configure the app
 app = Flask(__name__)
+log_dir = "/tmp/VisualAnalytics/"
 
 
 @app.route('/')
@@ -37,7 +39,13 @@ def get_data():
     Example GET endpoint to get data from the backend.
 
     """
-    data = pd.DataFrame(np.random.randn(6,4))
+    file = h5py.File(log_dir + "weights00.hdf5", "r")
+    group = file["dense_1"]
+    group2 = group["dense_1"]
+    data = group2["kernel:0"][:]
+    data = pd.DataFrame(data)
+
+    # data = pd.DataFrame(np.random.randn(6,4))
     return data.to_csv()
 
 
