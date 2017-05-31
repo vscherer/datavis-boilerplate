@@ -26,8 +26,12 @@ def make_log_dir(path):
 batch_size = 128
 num_classes = 10
 epochs = 20
-# Where to export the weight to
-log_dir = "/tmp/VisualAnalytics/"
+
+# The location of this script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Where to export the weights to
+log_dir = script_dir + "/data/"
 
 # the data, shuffled and split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()

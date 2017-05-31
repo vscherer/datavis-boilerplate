@@ -7,3 +7,4 @@ static/bundle.js
 \.idea/
 
 npm-debug\.log
+*.hdf5
