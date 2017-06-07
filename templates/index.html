@@ -1,20 +1,33 @@
 <!doctype html>
 
 <html lang="en">
-    <head>
-      <meta charset="utf-8">
+<head>
+    <style>
+        .slider {
+            margin-left: 30%;
+            margin-right: 30%;
+            width: 40%;
+        }
+    </style>
+    <meta charset="utf-8">
 
-        <title>Flask app</title>
-        <meta name="description" content="TheA Flask app">
-        <meta name="author" content="anconam">
-    </head>
+    <title>Flask app</title>
+    <meta name="description" content="The Flask app">
+    <meta name="author" content="vscherer">
+</head>
+{% include 'header.html' %}
+<div style="margin: auto; max-width: 800px" id="heatmap-div"></div>
+<input class="slider" type="range" id="epoch_slider" min="0" max="19" value="0" onchange="set_epoch()">
+</body>
 
-    <body>
-        {% include 'header.html' %}
-        <div style="margin: auto; max-width: 800px" id="heatmap-div"></div>
-    </body>
-
-    <script type="text/javascript" src="{{ url_for('static', filename='bundle.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bundle.js') }}">
+</script>
+<script>
+    function set_epoch() {
+        var x = document.getElementById("epoch_slider").value;
+        window.alert(x);
+    }
+</script>
 </html>
 
 
