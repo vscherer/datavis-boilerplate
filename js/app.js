@@ -24,7 +24,7 @@ function plot_epoch(epochnr) {
 
 
 function set_epoch() {
-    var x = document.getElementById("epoch_slider").value;
+    var x = document.getElementById("epoch-slider").value;
     plot_epoch(x);
 }
 

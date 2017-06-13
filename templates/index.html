@@ -2,22 +2,18 @@
 
 <html lang="en">
 <head>
-    <style>
-        .slider {
-            margin-left: 30%;
-            margin-right: 30%;
-            width: 40%;
-        }
-    </style>
     <meta charset="utf-8">
 
     <title>Flask app</title>
-    <meta name="description" content="The Flask app">
+    <meta name="description" content="Test">
     <meta name="author" content="vscherer">
+    <link href="{{ url_for('static', filename='style/main.css') }}" rel="stylesheet" type="text/css">
 </head>
+
 {% include 'header.html' %}
-<div style="margin: auto; max-width: 800px" id="heatmap-div"></div>
-<input class="slider" type="range" id="epoch_slider" min="0" max="19" value="0" onchange="set_epoch()">
+
+<div id="heatmap-div"></div>
+<input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
 </body>
 
 <script type="text/javascript" src="{{ url_for('static', filename='bundle.js') }}">
