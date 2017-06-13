@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Flask app</title>
+    <title>Data Visualization</title>
     <meta name="description" content="Test">
     <meta name="author" content="vscherer">
     <link href="{{ url_for('static', filename='style/main.css') }}" rel="stylesheet" type="text/css">
@@ -13,7 +13,10 @@
 {% include 'header.html' %}
 
 <div id="heatmap-div"></div>
+
 <input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
+<output for="epoch-slider" id="slider-output">0</output>
+
 </body>
 
 <script type="text/javascript" src="{{ url_for('static', filename='bundle.js') }}">

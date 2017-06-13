@@ -8,3 +8,8 @@
     margin: auto;
     max-width: 800px;
 }
+
+#slider-output {
+    margin-left: 30%;
+    width: 40px;
+}
