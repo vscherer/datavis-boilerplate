@@ -10,8 +10,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 log_dir = script_dir + "/demo/data/"
 weights = np.ndarray
 setup = False
-epochnr = 0
-
 
 @app.route('/')
 def hello_world():
@@ -62,8 +60,8 @@ def load_data():
     setup = True
 
 
-@app.route('/data/')
-def get_data():
+@app.route('/data/<int:epoch>')
+def get_data(epoch):
     """
     Example GET endpoint to get data from the backend.
 
@@ -71,21 +69,8 @@ def get_data():
     if not setup:
         load_data()
 
-    data = pd.DataFrame(weights[:, :, epochnr])
-
-    # data = pd.DataFrame(np.random.randn(6,4))
+    data = pd.DataFrame(weights[:, :, epoch])
     return data.to_csv()
-
-
-@app.route('/epoch/<int:nr>')
-def set_epoch(nr):
-    """
-    Updates the displayed weights to the parameter number
-    :param nr: The requested epoch
-    """
-    global epochnr
-    epochnr = nr
-    print(nr)
 
 if __name__ == '__main__':
     app.run(debug=True)
