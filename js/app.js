@@ -4,12 +4,12 @@ import * as d3 from 'd3'
 import Plotly from 'plotly.js'
 superagentJsonapify(superagent);
 
-plot_epoch(0);
+plot_epoch("dense_1",0);
 window.set_epoch = set_epoch;
 
-function plot_epoch(epochnr) {
+function plot_epoch(layername, epochnr) {
 // Use D3.js csv function to load and parse CSV data
-    d3.csv("/data/"+epochnr, function (data) {
+    d3.csv("/data/"+layername+"/"+epochnr, function (data) {
         // Plot using the powerful plotly.js
         // Alternatively, we could now use D3.js to plot whatever we need
         console.log(data)
@@ -24,9 +24,10 @@ function plot_epoch(epochnr) {
 
 
 function set_epoch() {
-    var x = document.getElementById("epoch-slider").value;
-    document.getElementById("slider-output").textContent = x;
-    plot_epoch(x);
+    var epochnr = document.getElementById("epoch-slider").value;
+    document.getElementById("slider-output").textContent = epochnr;
+    var layername = document.getElementById("layer-selection").value;
+    plot_epoch(layername,epochnr);
 }
 
 
