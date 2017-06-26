@@ -9,6 +9,11 @@
     max-width: 800px;
 }
 
+#statplot {
+    display: block;
+    margin: auto;
+}
+
 #slider-output {
     margin-left: 30%;
     width: 40px;

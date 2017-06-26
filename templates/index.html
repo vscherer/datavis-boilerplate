@@ -12,16 +12,17 @@
 
 {% include 'header.html' %}
 
-<div id="heatmap-div"></div>
-
 <input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
 <output for="epoch-slider" id="slider-output">0</output>
 
 <select id="layer-selection" onchange="set_epoch()">
-  <option value="dense_1">dense_1</option>
-  <option value="dense_2">dense_2</option>
-  <option value="dense_3">dense_3</option>
+    <option value="dense_1">dense_1</option>
+    <option value="dense_2">dense_2</option>
+    <option value="dense_3">dense_3</option>
 </select>
+
+<div id="heatmap-div"></div>
+<svg id="statplot" width="800" height="100"></svg>
 
 </body>
 
