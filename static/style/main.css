@@ -4,6 +4,11 @@
     width: 40%;
 }
 
+#play-button {
+    display: block;
+    margin: auto;
+}
+
 #heatmap-div {
     margin: auto;
     max-width: 800px;
@@ -17,4 +22,9 @@
 #slider-output {
     margin-left: 30%;
     width: 40px;
+}
+
+#layer-selection {
+    display: block;
+    margin: auto;
 }

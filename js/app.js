@@ -6,6 +6,8 @@ superagentJsonapify(superagent);
 
 plot_epoch("dense_1",0);
 window.set_epoch = set_epoch;
+window.play_pause = play_pause;
+var isPlaying = false;
 
 function plot_epoch(layername, epochnr) {
 // Use D3.js csv function to load and parse CSV data
@@ -110,9 +112,18 @@ function set_epoch() {
     plot_epoch(layername,epochnr);
 }
 
+function play_pause() {
+    if (isPlaying)
+    {
+        //Stop playing
+        isPlaying = false;
+        document.getElementById("play-button").innerHTML = "Play";
 
-
-
-
-
-
+    }
+    else
+    {
+        //Start playing
+        isPlaying = true;
+        document.getElementById("play-button").innerHTML = "Pause";
+    }
+}
