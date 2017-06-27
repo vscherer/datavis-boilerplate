@@ -127,9 +127,13 @@ function play_pause() {
     {
         //Start playing
         epochInterval = setInterval(function() {
-            document.getElementById("epoch-slider").value++;
+            var currEpoch = +document.getElementById("epoch-slider").value;
+            var epochSize = +document.getElementById("epoch-slider").max;
+            
+            //Increase and loop if max
+            document.getElementById("epoch-slider").value = (currEpoch+1)%(epochSize+1);
             set_epoch();
-        }, 5000);
+        }, 1000);
 
         isPlaying = true;
         document.getElementById("play-button").innerHTML = "Pause";
