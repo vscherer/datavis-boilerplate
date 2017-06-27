@@ -112,10 +112,13 @@ function set_epoch() {
     plot_epoch(layername,epochnr);
 }
 
+var epochInterval;
+
 function play_pause() {
     if (isPlaying)
     {
         //Stop playing
+        clearInterval(epochInterval);
         isPlaying = false;
         document.getElementById("play-button").innerHTML = "Play";
 
@@ -123,6 +126,11 @@ function play_pause() {
     else
     {
         //Start playing
+        epochInterval = setInterval(function() {
+            document.getElementById("epoch-slider").value++;
+            set_epoch();
+        }, 5000);
+
         isPlaying = true;
         document.getElementById("play-button").innerHTML = "Pause";
     }
