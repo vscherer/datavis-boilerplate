@@ -37,44 +37,59 @@ function plot_stats(data) {
     console.log("Graph size: " + width + "x" + height);
 
     var statData = calc_stats(data);
+    console.log("StatData: " + statData);
 
     var x = d3.scaleLinear()
         .domain([0, statData.length])
         .range([0, width]);
 
     var y = d3.scaleLinear()
-        .domain([-0.05, 0.05])
+        .domain([-0.1, 0.1])
         .range([height, 0]);
 
-    var line = d3.line()
+    var avgLine = d3.line()
         .x(function(d) { return x(d[0]); })
         .y(function(d) { return y(d[1]); });
 
-        g.append("g")
-            .attr('class', 'x axis')
-            .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).ticks(4))
-            .select(".domain")
-            .remove();
+    var varLine = d3.line()
+        .x(function(d) { return x(d[0]); })
+        .y(function(d) { return y(d[2]); });
 
-        g.append("g")
-            .call(d3.axisLeft(y).ticks(3))
-            .append("text")
-            .attr("fill", "#000")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", "0.71em")
-            .attr("text-anchor", "end")
-            .text("AVG");
+    g.append("g")
+        .attr('class', 'x axis')
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).ticks(4))
+        .select(".domain")
+        .remove();
 
-        g.append("path")
-            .datum(statData)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
-            .attr("stroke-width", 1.5)
-            .attr("d", line);
+    g.append("g")
+        .call(d3.axisLeft(y).ticks(3))
+        .append("text")
+        .attr("fill", "#000")
+        //.attr("transform", "rotate(-90)")
+        .attr("y", -15)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .text("AVG&VAR");
+
+    g.append("path")
+        .datum(statData)
+        .attr("fill", "none")
+        .attr("stroke", "coral")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5)
+        .attr("d", varLine);
+
+    g.append("path")
+        .datum(statData)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", 1.5)
+        .attr("d", avgLine);
+
 }
 
 function calc_stats(data) {
@@ -82,26 +97,35 @@ function calc_stats(data) {
     var dataSize = data.length;
     console.log("Data size: " + dataSize + "x" + dataAmount);
 
-    //Array: Index, Avg, (Var)
+    //Array: Index, Avg, Var
     var stats = [];
 
-    //Index
-    var indexes = [];
-    indexes.push(Array.from(new Array(dataAmount), (x,i) => i));
-
-    //Average
     for ( var i = 0; i < dataAmount; i++) {
+        //Grab a column
         var col = [];
         for (var j = 0; j<dataSize; j++) {
             col.push(data[j][i]);
         }
+
+        //Average
         var sum = 0;
         for (var j = 0; j<col.length; j++) {
-            sum = sum + parseInt(col[j]);
+            sum += parseInt(col[j]);
         }
         var avg = sum / col.length;
-        stats.push([i, avg]);
+
+        //Variance
+        var varsum = 0;
+        for (var j = 0; j<col.length; j++) {
+            var diff = parseInt(col[j])-avg;
+            varsum += diff*diff;
+        }
+        var variance = varsum / col.length;
+
+        stats.push([i, avg, variance]);
     }
+
+
     return stats;
 }
 
@@ -129,7 +153,7 @@ function play_pause() {
         epochInterval = setInterval(function() {
             var currEpoch = +document.getElementById("epoch-slider").value;
             var epochSize = +document.getElementById("epoch-slider").max;
-            
+
             //Increase and loop if max
             document.getElementById("epoch-slider").value = (currEpoch+1)%(epochSize+1);
             set_epoch();
