@@ -27,12 +27,15 @@ function plot_epoch(layername, epochnr) {
 
 
 function plot_stats(data) {
+    //Remove old plots
     d3.select('#avgplot').selectAll("*").remove();
     d3.select('#varplot').selectAll("*").remove();
 
+    //Grab svg elements
     var avgsvg = d3.select('#avgplot')
     var varsvg = d3.select('#varplot')
 
+    //Calculate stats to display
     var statData = calc_stats(data);
 
     //Console dump for debugging purposes
@@ -43,11 +46,12 @@ function plot_stats(data) {
         statData[2][0] + "; " + statData[2][1] + "; " + statData[2][2] + "\n" +
         "...");
 
-    drawHorizontalGraph(avgsvg, statData, 1, "steelblue");
-    drawHorizontalGraph(varsvg, statData, 2, "coral");
+    //Draw the graphs
+    drawHorizontalGraph(avgsvg, statData, "AVG", 1, "steelblue");
+    drawHorizontalGraph(varsvg, statData, "VAR", 2, "coral");
 }
 
-function drawHorizontalGraph (svg, statData, colIndex, color) {
+function drawHorizontalGraph (svg, data, name, colIndex, color) {
 
     var margin = {top: 20, right: 20, bottom: 30, left: 50},
         width = +svg.attr("width") - margin.left - margin.right,
@@ -57,7 +61,7 @@ function drawHorizontalGraph (svg, statData, colIndex, color) {
     //console.log("Graph size: " + width + "x" + height);
 
     var x = d3.scaleLinear()
-        .domain([0, statData.length])
+        .domain([0, data.length])
         .range([0, width]);
 
     var y = d3.scaleLinear()
@@ -85,11 +89,11 @@ function drawHorizontalGraph (svg, statData, colIndex, color) {
         .attr("y", -15)
         .attr("dy", "0.71em")
         .attr("text-anchor", "end")
-        .text("AVG&VAR");
+        .text(name);
 
     //Graph
     g.append("path")
-        .datum(statData)
+        .datum(data)
         .attr("fill", "none")
         .attr("stroke", color)
         .attr("stroke-linejoin", "round")
