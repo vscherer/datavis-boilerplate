@@ -34,17 +34,24 @@ function plot_stats(data) {
         height = +svg.attr("height") - margin.top - margin.bottom,
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    console.log("Graph size: " + width + "x" + height);
+    //console.log("Graph size: " + width + "x" + height);
 
     var statData = calc_stats(data);
-    console.log("StatData: " + statData);
+
+    //Console dump for debugging purposes
+    console.log("StatData:\n" +
+        "Index; Average; Variance\n" +
+        statData[0][0] + "; " + statData[0][1] + "; " + statData[0][2] + "\n" +
+        statData[1][0] + "; " + statData[1][1] + "; " + statData[1][2] + "\n" +
+        statData[2][0] + "; " + statData[2][1] + "; " + statData[2][2] + "\n" +
+        "...");
 
     var x = d3.scaleLinear()
         .domain([0, statData.length])
         .range([0, width]);
 
     var y = d3.scaleLinear()
-        .domain([-0.1, 0.1])
+        .domain([-0.05, 0.05])
         .range([height, 0]);
 
     var avgLine = d3.line()
@@ -55,6 +62,7 @@ function plot_stats(data) {
         .x(function(d) { return x(d[0]); })
         .y(function(d) { return y(d[2]); });
 
+    //X Axis
     g.append("g")
         .attr('class', 'x axis')
         .attr("transform", "translate(0," + height + ")")
@@ -62,6 +70,7 @@ function plot_stats(data) {
         .select(".domain")
         .remove();
 
+    //Y Axis
     g.append("g")
         .call(d3.axisLeft(y).ticks(3))
         .append("text")
@@ -72,6 +81,7 @@ function plot_stats(data) {
         .attr("text-anchor", "end")
         .text("AVG&VAR");
 
+    //Variance Graph
     g.append("path")
         .datum(statData)
         .attr("fill", "none")
@@ -81,6 +91,7 @@ function plot_stats(data) {
         .attr("stroke-width", 1.5)
         .attr("d", varLine);
 
+    //Average Graph
     g.append("path")
         .datum(statData)
         .attr("fill", "none")
@@ -110,14 +121,14 @@ function calc_stats(data) {
         //Average
         var sum = 0;
         for (var j = 0; j<col.length; j++) {
-            sum += parseInt(col[j]);
+            sum += parseFloat(col[j]);
         }
         var avg = sum / col.length;
 
         //Variance
         var varsum = 0;
         for (var j = 0; j<col.length; j++) {
-            var diff = parseInt(col[j])-avg;
+            var diff = parseFloat(col[j])-avg;
             varsum += diff*diff;
         }
         var variance = varsum / col.length;
@@ -157,7 +168,7 @@ function play_pause() {
             //Increase and loop if max
             document.getElementById("epoch-slider").value = (currEpoch+1)%(epochSize+1);
             set_epoch();
-        }, 1000);
+        }, 3000);
 
         isPlaying = true;
         document.getElementById("play-button").innerHTML = "Pause";
