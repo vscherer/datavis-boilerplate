@@ -14,7 +14,12 @@
     max-width: 800px;
 }
 
-#statplot {
+#avgplot {
+    display: block;
+    margin: auto;
+}
+
+#varplot {
     display: block;
     margin: auto;
 }

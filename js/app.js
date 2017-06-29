@@ -27,14 +27,11 @@ function plot_epoch(layername, epochnr) {
 
 
 function plot_stats(data) {
-    d3.select('#statplot').selectAll("*").remove();
-    var svg = d3.select('#statplot'),
-        margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom,
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    d3.select('#avgplot').selectAll("*").remove();
+    d3.select('#varplot').selectAll("*").remove();
 
-    //console.log("Graph size: " + width + "x" + height);
+    var avgsvg = d3.select('#avgplot')
+    var varsvg = d3.select('#varplot')
 
     var statData = calc_stats(data);
 
@@ -46,6 +43,19 @@ function plot_stats(data) {
         statData[2][0] + "; " + statData[2][1] + "; " + statData[2][2] + "\n" +
         "...");
 
+    drawHorizontalGraph(avgsvg, statData, 1, "steelblue");
+    drawHorizontalGraph(varsvg, statData, 2, "coral");
+}
+
+function drawHorizontalGraph (svg, statData, colIndex, color) {
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = +svg.attr("width") - margin.left - margin.right,
+        height = +svg.attr("height") - margin.top - margin.bottom,
+        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    //console.log("Graph size: " + width + "x" + height);
+
     var x = d3.scaleLinear()
         .domain([0, statData.length])
         .range([0, width]);
@@ -54,13 +64,9 @@ function plot_stats(data) {
         .domain([-0.05, 0.05])
         .range([height, 0]);
 
-    var avgLine = d3.line()
+    var line = d3.line()
         .x(function(d) { return x(d[0]); })
-        .y(function(d) { return y(d[1]); });
-
-    var varLine = d3.line()
-        .x(function(d) { return x(d[0]); })
-        .y(function(d) { return y(d[2]); });
+        .y(function(d) { return y(d[colIndex]); });
 
     //X Axis
     g.append("g")
@@ -81,25 +87,15 @@ function plot_stats(data) {
         .attr("text-anchor", "end")
         .text("AVG&VAR");
 
-    //Variance Graph
+    //Graph
     g.append("path")
         .datum(statData)
         .attr("fill", "none")
-        .attr("stroke", "coral")
+        .attr("stroke", color)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.5)
-        .attr("d", varLine);
-
-    //Average Graph
-    g.append("path")
-        .datum(statData)
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5)
-        .attr("d", avgLine);
+        .attr("d", line);
 
 }
 
