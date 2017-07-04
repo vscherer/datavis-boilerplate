@@ -12,19 +12,54 @@ var isPlaying = false;
 function plot_epoch(layername, epochnr) {
 // Use D3.js csv function to load and parse CSV data
     d3.csv("/data/"+layername+"/"+epochnr, function (data) {
-        // Plot using the powerful plotly.js
-        // Alternatively, we could now use D3.js to plot whatever we need
-        //console.log(data)
+
         var matrix = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
-        var data = [{
+
+        //Plotly
+        /*var data = [{
             z: matrix,
             type: 'heatmap'
         }];
-        Plotly.newPlot('heatmap-div', data);
+        Plotly.newPlot('heatmap-div', data);*/
+
+
+        plot_weights(matrix);
         plot_stats(matrix);
     });
 }
 
+function plot_weights(data) {
+    //Remove old heatmap
+    d3.select('#heatmap-div').selectAll("*").remove();
+
+    //Setup heatmap options
+    var margin = { top: 20, right: 20, bottom: 20, left: 20 },
+        width = 900 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom,
+        gridSize = Math.max(Math.floor(width / Math.max(data.length, data[0].length)), 1); //TODO actual scaling
+    console.log("GridSize: " + gridSize);
+
+    //Create svg element
+    var svg = d3.select('#heatmap-div').append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    //TODO Colorscale
+
+    var points = svg.selectAll(".weight")
+        .data(data);
+
+    points.enter().append("rect")
+        .attr("x", function(d) { return /* X* */ 450+Math.random()*100*gridSize; }) //TODO get X
+        .attr("y", function(d) { return /* Y* */ 100+Math.random()*100*gridSize; }) //TODO get Y
+        .attr("width", gridSize)
+        .attr("height", gridSize)
+        .style("fill", '#'+Math.random().toString(16).substr(-6)); //TODO Calculate colors
+
+    points.exit().remove();
+}
 
 function plot_stats(data) {
     //Remove old plots
@@ -32,19 +67,20 @@ function plot_stats(data) {
     d3.select('#varplot').selectAll("*").remove();
 
     //Grab svg elements
-    var avgsvg = d3.select('#avgplot')
-    var varsvg = d3.select('#varplot')
+    var avgsvg = d3.select('#avgplot');
+    var varsvg = d3.select('#varplot');
 
     //Calculate stats to display
     var statData = calc_stats(data);
 
     //Console dump for debugging purposes
-    console.log("StatData:\n" +
+    /*console.log("StatData:\n" +
         "Index; Average; Variance\n" +
         statData[0][0] + "; " + statData[0][1] + "; " + statData[0][2] + "\n" +
         statData[1][0] + "; " + statData[1][1] + "; " + statData[1][2] + "\n" +
         statData[2][0] + "; " + statData[2][1] + "; " + statData[2][2] + "\n" +
         "...");
+    */
 
     //Draw the graphs
     drawHorizontalGraph(avgsvg, statData, "AVG", 1, "steelblue");
@@ -65,7 +101,7 @@ function drawHorizontalGraph (svg, data, name, colIndex, color) {
         .range([0, width]);
 
     var y = d3.scaleLinear()
-        .domain([-0.05, 0.05])
+        .domain([-0.03, 0.03])
         .range([height, 0]);
 
     var line = d3.line()
