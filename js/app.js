@@ -48,17 +48,21 @@ function plot_weights(data) {
 
     //TODO Colorscale
 
-    var points = svg.selectAll(".weight")
-        .data(data);
+    var tr = svg.selectAll("tr")
+        .data(data)
+        .enter()
+        .append("tr");
 
-    points.enter().append("rect")
+    var td = tr.selectAll("td")
+        .data(function(d) { return d; })
+        .enter().append("rect")
         .attr("x", function(d) { return /* X* */ 450+Math.random()*100*gridSize; }) //TODO get X
         .attr("y", function(d) { return /* Y* */ 100+Math.random()*100*gridSize; }) //TODO get Y
         .attr("width", gridSize)
         .attr("height", gridSize)
-        .style("fill", '#'+Math.random().toString(16).substr(-6)); //TODO Calculate colors
+        .style("fill", function(d) { return '#'+Math.random().toString(16).substr(-6);}); //TODO Calculate colors
 
-    points.exit().remove();
+    td.exit().remove();
 }
 
 function plot_stats(data) {
