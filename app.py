@@ -8,8 +8,6 @@ import os
 app = Flask(__name__)
 script_dir = os.path.dirname(os.path.abspath(__file__))
 log_dir = script_dir + "/demo/data/"
-weights = np.ndarray
-setup = ""
 
 @app.route('/')
 def hello_world():
@@ -35,9 +33,10 @@ def add_header(r):
 #####################################
 # REST backend interface
 
+@app.route('/data/<string:layername>/<int:epoch>')
+def get_data(layername,epoch):
+    #weights = np.ndarray
 
-def load_data(layername):
-    """Initial loading of data into array"""
     # Get size of data
     epochnr = 20;
     file = h5py.File(log_dir + "weights00.hdf5", "r")
@@ -45,7 +44,6 @@ def load_data(layername):
     (sizeX, sizeY) = matrix.shape
 
     # Combine all the data
-    global weights
     weights = np.zeros((sizeX, sizeY, epochnr))
     for i in range(0, epochnr):
         if i < 10:
@@ -56,18 +54,6 @@ def load_data(layername):
         group2 = group[layername]
         matrix = group2["kernel:0"][:]
         weights[:, :, i] = matrix
-    global setup
-    setup = layername
-
-
-@app.route('/data/<string:layername>/<int:epoch>')
-def get_data(layername,epoch):
-    """
-    Example GET endpoint to get data from the backend.
-
-    """
-    if not setup == layername:
-        load_data(layername)
 
     data = pd.DataFrame(weights[:, :, epoch])
     return data.to_csv()

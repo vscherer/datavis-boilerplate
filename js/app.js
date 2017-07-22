@@ -8,25 +8,26 @@ plot_epoch("dense_1",0);
 window.set_epoch = set_epoch;
 window.play_pause = play_pause;
 var isPlaying = false;
+var DATA;
 
 function plot_epoch(layername, epochnr) {
 // Use D3.js csv function to load and parse CSV data
     d3.csv("/data/"+layername+"/"+epochnr, function (data) {
 
-        var matrix = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
+        DATA = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
 
         //Plotly
         var data = [{
-            z: matrix,
+            z: DATA,
             type: 'heatmap'
         }];
         Plotly.newPlot('heatmap-div', data);
-        plot_stats(matrix);
+        plot_stats();
     });
 }
 
 
-function plot_stats(data) {
+function plot_stats() {
     //Remove old plots
     d3.select('#avgplot').selectAll("*").remove();
     d3.select('#varplot').selectAll("*").remove();
@@ -36,7 +37,7 @@ function plot_stats(data) {
     var varsvg = d3.select('#varplot');
 
     //Calculate stats to display
-    var statData = calc_stats(data);
+    var statData = calc_stats();
 
     //Console dump for debugging purposes
     /*console.log("StatData:\n" +
@@ -104,9 +105,9 @@ function drawHorizontalGraph (svg, data, name, colIndex, color) {
 
 }
 
-function calc_stats(data) {
-    var dataAmount = data[0].length;
-    var dataSize = data.length;
+function calc_stats() {
+    var dataAmount = DATA[0].length;
+    var dataSize = DATA.length;
     console.log("Data size: " + dataSize + "x" + dataAmount);
 
     //Array: Index, Avg, Var
@@ -116,7 +117,7 @@ function calc_stats(data) {
         //Grab a column
         var col = [];
         for (var j = 0; j<dataSize; j++) {
-            col.push(data[j][i]);
+            col.push(DATA[j][i]);
         }
 
         //Average
