@@ -16,54 +16,15 @@ function plot_epoch(layername, epochnr) {
         var matrix = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
 
         //Plotly
-        /*var data = [{
+        var data = [{
             z: matrix,
             type: 'heatmap'
         }];
-        Plotly.newPlot('heatmap-div', data);*/
-
-
-        plot_weights(matrix);
+        Plotly.newPlot('heatmap-div', data);
         plot_stats(matrix);
     });
 }
 
-function plot_weights(data) {
-    //Remove old heatmap
-    d3.select('#heatmap-div').selectAll("*").remove();
-
-    //Setup heatmap options
-    var margin = { top: 20, right: 20, bottom: 20, left: 20 },
-        width = 900 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-        gridSize = Math.max(Math.floor(width / Math.max(data.length, data[0].length)), 1); //TODO actual scaling
-    console.log("GridSize: " + gridSize);
-
-    //Create svg element
-    var svg = d3.select('#heatmap-div').append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    //TODO Colorscale
-
-    var tr = svg.selectAll("tr")
-        .data(data)
-        .enter()
-        .append("tr");
-
-    var td = tr.selectAll("td")
-        .data(function(d) { return d; })
-        .enter().append("rect")
-        .attr("x", function(d) { return /* X* */ 450+Math.random()*100*gridSize; }) //TODO get X
-        .attr("y", function(d) { return /* Y* */ 100+Math.random()*100*gridSize; }) //TODO get Y
-        .attr("width", gridSize)
-        .attr("height", gridSize)
-        .style("fill", function(d) { return '#'+Math.random().toString(16).substr(-6);}); //TODO Calculate colors
-
-    td.exit().remove();
-}
 
 function plot_stats(data) {
     //Remove old plots
