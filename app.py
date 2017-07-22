@@ -43,6 +43,7 @@ def get_data(layername,epoch):
     matrix = file[layername][layername]["kernel:0"][:]
     (sizeX, sizeY) = matrix.shape
 
+    """
     # Combine all the data
     weights = np.zeros((sizeX, sizeY, epochnr))
     for i in range(0, epochnr):
@@ -54,9 +55,19 @@ def get_data(layername,epoch):
         group2 = group[layername]
         matrix = group2["kernel:0"][:]
         weights[:, :, i] = matrix
+    """
 
-    data = pd.DataFrame(weights[:, :, epoch])
-    return data.to_csv()
+    weights = np.zeros((sizeX, sizeY))
+    if epoch < 10:
+        file = h5py.File(log_dir + "weights0" + str(epoch) + ".hdf5", "r")
+    else:
+        file = h5py.File(log_dir + "weights" + str(epoch) + ".hdf5", "r")
+    group = file[layername]
+    group2 = group[layername]
+    matrix = group2["kernel:0"][:]
+
+    #data = pd.DataFrame(weights[:, :, epoch])
+    return pd.DataFrame(matrix).to_csv()
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -4,30 +4,47 @@ import * as d3 from 'd3'
 import Plotly from 'plotly.js'
 superagentJsonapify(superagent);
 
-plot_epoch("dense_1",0);
 window.set_epoch = set_epoch;
+window.set_layer = set_layer;
 window.play_pause = play_pause;
 var isPlaying = false;
 var DATA;
 
-function plot_epoch(layername, epochnr) {
-// Use D3.js csv function to load and parse CSV data
-    d3.csv("/data/"+layername+"/"+epochnr, function (data) {
+loadData("dense_1");
+render(0);
 
-        DATA = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
+function loadData(layername) {
 
-        //Plotly
-        var data = [{
-            z: DATA,
-            type: 'heatmap'
-        }];
-        Plotly.newPlot('heatmap-div', data);
-        plot_stats();
-    });
+    DATA = [];
+    for (var i = 0; i < 20; i++) {
+        // Use D3.js csv function to load and parse CSV data
+        d3.csv("/data/"+layername+"/"+i, function (data) {
+            var matrix = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
+            console.log(matrix);
+            DATA.push(matrix);
+        });
+    }
+    console.log(DATA);
+}
+
+function render(epochNr) {
+
+    //Grab current epoch data
+    var epochData = DATA[epochNr];
+
+    //The main plot using Plotly
+    var plotlyData = [{
+        z: epochData,
+        type: 'heatmap'
+    }];
+    Plotly.newPlot('heatmap-div', plotlyData);
+
+    //The graphs
+    plot_stats(epochData);
 }
 
 
-function plot_stats() {
+function plot_stats(data) {
     //Remove old plots
     d3.select('#avgplot').selectAll("*").remove();
     d3.select('#varplot').selectAll("*").remove();
@@ -37,7 +54,7 @@ function plot_stats() {
     var varsvg = d3.select('#varplot');
 
     //Calculate stats to display
-    var statData = calc_stats();
+    var statData = calc_stats(data);
 
     //Console dump for debugging purposes
     /*console.log("StatData:\n" +
@@ -105,9 +122,9 @@ function drawHorizontalGraph (svg, data, name, colIndex, color) {
 
 }
 
-function calc_stats() {
-    var dataAmount = DATA[0].length;
-    var dataSize = DATA.length;
+function calc_stats(data) {
+    var dataAmount = data[0].length;
+    var dataSize = data.length;
     console.log("Data size: " + dataSize + "x" + dataAmount);
 
     //Array: Index, Avg, Var
@@ -117,7 +134,7 @@ function calc_stats() {
         //Grab a column
         var col = [];
         for (var j = 0; j<dataSize; j++) {
-            col.push(DATA[j][i]);
+            col.push(data[j][i]);
         }
 
         //Average
@@ -145,8 +162,14 @@ function calc_stats() {
 function set_epoch() {
     var epochnr = document.getElementById("epoch-slider").value;
     document.getElementById("slider-output").textContent = epochnr;
+    render(epochnr);
+}
+
+function set_layer() {
     var layername = document.getElementById("layer-selection").value;
-    plot_epoch(layername,epochnr);
+    loadData(layername);
+    var epochnr = document.getElementById("epoch-slider").value;
+    render(epochnr);
 }
 
 var epochInterval;
@@ -170,7 +193,7 @@ function play_pause() {
             //Increase and loop if max
             document.getElementById("epoch-slider").value = (currEpoch+1)%(epochSize+1);
             set_epoch();
-        }, 3000);
+        }, 500);
 
         isPlaying = true;
         document.getElementById("play-button").innerHTML = "Pause";
