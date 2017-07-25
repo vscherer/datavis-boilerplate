@@ -23,7 +23,7 @@
     "d3": "^4.9.1",
     "jpickle": "^0.4.1",
     "jquery": "^3.2.1",
-    "ndarray": "^1.0.18",
+    "numjs": "^0.14.0",
     "plotly.js": "^1.27.1",
     "superagent": "^3.5.2",
     "superagent-jsonapify": "^1.4.4"

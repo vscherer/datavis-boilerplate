@@ -87,18 +87,7 @@ def get_data(layername):
             weights = np.zeros((epochnr,) + data.shape)
         weights[i, ...] = data[:]
 
-    # weights = np.zeros((sizeX, sizeY))
-    # if epoch < 10:
-    #     file = h5py.File(log_dir + "weights0" + str(epoch) + ".hdf5", "r")
-    # else:
-    #     file = h5py.File(log_dir + "weights" + str(epoch) + ".hdf5", "r")
-    # group = file[layername]
-    # group2 = group[layername]
-    # matrix = group2["kernel:0"][:]
-
-    #data = pd.DataFrame(weights[:, :, epoch])
-    return pickle.dumps(weights, protocol=0)
-    #return pd.DataFrame(weights).to_json(double_precision=4)
+    return jsonify(weights.flatten().round(decimals=4).tolist())
 
 if __name__ == '__main__':
     app.run(debug=True)

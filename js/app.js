@@ -3,7 +3,7 @@ import superagentJsonapify from 'superagent-jsonapify';
 import * as d3 from 'd3'
 import jQuery from 'jquery';
 import Plotly from 'plotly.js'
-import ndarray from 'ndarray';
+import nj from 'numjs';
 import jpickle from 'jpickle';
 superagentJsonapify(superagent);
 
@@ -17,41 +17,33 @@ var META;
 loadMetadata();
 
 function loadMetadata() {
-	d3.json("/meta", function (data) {
-	    console.log(data);
-	    META = data;
-		jQuery('#layer-selection').empty()
+    d3.json("/meta", function (data) {
+        META = data;
+        jQuery('#layer-selection').empty();
         jQuery.each(Object.keys(META['datasets']), function(val, text) {
-					jQuery('#layer-selection').append( jQuery('<option></option>').val(text).html(text) )
-		}); // there was also a ) missing here
-	});
+            jQuery('#layer-selection').append( jQuery('<option></option>').val(text).html(text))
+        });
+    });
 }
 
-function loadData(layername) {
+function loadData(layername, callback) {
     if (!layername) return;
-    console.log(layername)
-    DATA = [];
-    let layer_shape = META['datasets'][layername]['shape']
-	  let layername_url = layername.replace(/\//g, '__');
+    let epochs = META['epochs'];
+    let layer_shape = META['datasets'][layername]['shape'];
+    let layername_url = layername.replace(/\//g, '__');
 
-    superagent.get("/data/" + layername_url)
-			.buffer(true)
-			.end(function(err, res){
-			    console.log(res.body)
-				let data = jpickle.loads(res.body)
-        console.log(data)
-				DATA = data
-			})
-	  // d3.json("/data/" + layername_url, function (data) {
-		 //    //console.log(data)
-     //  //let nd_data = ndarray(data, layer_shape.push())
-     //  //npm install jpickleconsole.log(nd_data)
-     //
-		 //    // var matrix = data.map((row) => Object.values(row)) //.slice(0, Object.values(row).length - 1));
-		 //    //console.log(matrix);
-		 //    //DATA.push(matrix);
-	  // });
-
+    d3.json("/data/" + layername_url, function (data) {
+        // Load JSON flatten array to numjs
+        var njdata = nj.array(data);
+        // Define shape
+        var shape = [epochs, ...layer_shape];
+        if (shape.length === 2) shape.push(1); // make sure it is 2D
+        else if (shape.length !== 3) return alert('Only 2D data supported');
+        // Store in global var
+        DATA = njdata.reshape(shape).tolist();
+        // Call callback
+        if (callback) callback();
+    });
 }
 
 function render(epochNr) {
@@ -194,9 +186,10 @@ function set_epoch() {
 
 function set_layer() {
     var layername = document.getElementById("layer-selection").value;
-    loadData(layername);
-    var epochnr = document.getElementById("epoch-slider").value;
-    render(epochnr);
+    loadData(layername, function() {
+        var epochnr = document.getElementById("epoch-slider").value;
+        render(epochnr);
+    });
 }
 
 var epochInterval;
