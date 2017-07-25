@@ -1,8 +1,9 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
+import pickle
 import pandas as pd
 import numpy as np
 import h5py
-import os
+import os, glob, re
 
 # Configure the app
 app = Flask(__name__)
@@ -30,44 +31,74 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
+
+def _get_metadata():
+    # List parameter files
+    files = sorted(glob.glob(log_dir + "weights*.hdf5"))
+    attributes = {
+        'epochs': len(files),
+        'datasets': {},
+        'groups': {}
+    }
+
+    # Get other attributes (assume all files in 'files' have the same structure
+    file = h5py.File(files[0], "r")
+
+    def print_attrs(name, node):
+        if isinstance(node, h5py.Dataset):
+            # node is a dataset
+            attributes['datasets'][name] = {
+                'shape': node.shape
+            }
+        else:
+            # node is a group
+            attributes['groups'][name] = {}
+            for key in node.attrs.keys():
+                attributes['groups'][name][key] = str(node.attrs[key])
+
+    file.visititems(print_attrs)
+    return files, attributes
+
 #####################################
 # REST backend interface
 
-@app.route('/data/<string:layername>/<int:epoch>')
-def get_data(layername,epoch):
-    #weights = np.ndarray
+@app.route('/meta')
+def get_metadata():
+    files, attributes = _get_metadata()
+    return jsonify(attributes)
 
-    # Get size of data
-    epochnr = 20;
-    file = h5py.File(log_dir + "weights00.hdf5", "r")
-    matrix = file[layername][layername]["kernel:0"][:]
-    (sizeX, sizeY) = matrix.shape
+@app.route('/data/<string:layername>')
+def get_data(layername):
 
-    """
+    if not layername:
+        return 404
+
+    layername = re.sub(r"__", "/", layername, 0)
+
+    files, attributes = _get_metadata()
+    epochnr = len(files)
+
     # Combine all the data
-    weights = np.zeros((sizeX, sizeY, epochnr))
-    for i in range(0, epochnr):
-        if i < 10:
-            file = h5py.File(log_dir + "weights0" + str(i) + ".hdf5", "r")
-        else:
-            file = h5py.File(log_dir + "weights" + str(i) + ".hdf5", "r")
-        group = file[layername]
-        group2 = group[layername]
-        matrix = group2["kernel:0"][:]
-        weights[:, :, i] = matrix
-    """
+    weights = None
+    for i, f_name in enumerate(files):
+        file = h5py.File(f_name, "r")
+        data = file.get(layername)
+        if weights is None:
+            weights = np.zeros((epochnr,) + data.shape)
+        weights[i, ...] = data[:]
 
-    weights = np.zeros((sizeX, sizeY))
-    if epoch < 10:
-        file = h5py.File(log_dir + "weights0" + str(epoch) + ".hdf5", "r")
-    else:
-        file = h5py.File(log_dir + "weights" + str(epoch) + ".hdf5", "r")
-    group = file[layername]
-    group2 = group[layername]
-    matrix = group2["kernel:0"][:]
+    # weights = np.zeros((sizeX, sizeY))
+    # if epoch < 10:
+    #     file = h5py.File(log_dir + "weights0" + str(epoch) + ".hdf5", "r")
+    # else:
+    #     file = h5py.File(log_dir + "weights" + str(epoch) + ".hdf5", "r")
+    # group = file[layername]
+    # group2 = group[layername]
+    # matrix = group2["kernel:0"][:]
 
     #data = pd.DataFrame(weights[:, :, epoch])
-    return pd.DataFrame(matrix).to_csv()
+    return pickle.dumps(weights, protocol=0)
+    #return pd.DataFrame(weights).to_json(double_precision=4)
 
 if __name__ == '__main__':
     app.run(debug=True)

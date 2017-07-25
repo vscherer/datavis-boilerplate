@@ -1,7 +1,10 @@
 import superagent from 'superagent';
 import superagentJsonapify from 'superagent-jsonapify';
 import * as d3 from 'd3'
+import jQuery from 'jquery';
 import Plotly from 'plotly.js'
+import ndarray from 'ndarray';
+import jpickle from 'jpickle';
 superagentJsonapify(superagent);
 
 window.set_epoch = set_epoch;
@@ -9,22 +12,46 @@ window.set_layer = set_layer;
 window.play_pause = play_pause;
 var isPlaying = false;
 var DATA;
+var META;
 
-loadData("dense_1");
-render(0);
+loadMetadata();
+
+function loadMetadata() {
+	d3.json("/meta", function (data) {
+	    console.log(data);
+	    META = data;
+		jQuery('#layer-selection').empty()
+        jQuery.each(Object.keys(META['datasets']), function(val, text) {
+					jQuery('#layer-selection').append( jQuery('<option></option>').val(text).html(text) )
+		}); // there was also a ) missing here
+	});
+}
 
 function loadData(layername) {
-
+    if (!layername) return;
+    console.log(layername)
     DATA = [];
-    for (var i = 0; i < 20; i++) {
-        // Use D3.js csv function to load and parse CSV data
-        d3.csv("/data/"+layername+"/"+i, function (data) {
-            var matrix = data.map((row) => Object.values(row).slice(0, Object.values(row).length - 1));
-            console.log(matrix);
-            DATA.push(matrix);
-        });
-    }
-    console.log(DATA);
+    let layer_shape = META['datasets'][layername]['shape']
+	  let layername_url = layername.replace(/\//g, '__');
+
+    superagent.get("/data/" + layername_url)
+			.buffer(true)
+			.end(function(err, res){
+			    console.log(res.body)
+				let data = jpickle.loads(res.body)
+        console.log(data)
+				DATA = data
+			})
+	  // d3.json("/data/" + layername_url, function (data) {
+		 //    //console.log(data)
+     //  //let nd_data = ndarray(data, layer_shape.push())
+     //  //npm install jpickleconsole.log(nd_data)
+     //
+		 //    // var matrix = data.map((row) => Object.values(row)) //.slice(0, Object.values(row).length - 1));
+		 //    //console.log(matrix);
+		 //    //DATA.push(matrix);
+	  // });
+
 }
 
 function render(epochNr) {
