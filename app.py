@@ -1,9 +1,8 @@
 from flask import Flask, render_template, jsonify
-import pickle
-import pandas as pd
 import numpy as np
 import h5py
 import os, glob, re
+import rapidjson
 
 # Configure the app
 app = Flask(__name__)
@@ -87,7 +86,7 @@ def get_data(layername):
             weights = np.zeros((epochnr,) + data.shape)
         weights[i, ...] = data[:]
 
-    return jsonify(weights.flatten().round(decimals=4).tolist())
+    return rapidjson.dumps(weights.flatten().round(decimals=4).tolist())
 
 if __name__ == '__main__':
     app.run(debug=True)

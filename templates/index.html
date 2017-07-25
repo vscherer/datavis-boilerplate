@@ -16,10 +16,14 @@
 <select id="layer-selection" onchange="set_layer()">
     <option value="none">Loading metadata...</option>
 </select>
+<div style="text-align:center; width:100%">
+    <div class="loader" style="display:none"></div>
+</div>
 
 <output for="epoch-slider" id="slider-output">0</output>
 <input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
 <button type="button" id="play-button" onclick="play_pause()">Play</button>
+
 
 <div id="heatmap-div"></div>
 <svg id="avgplot" width="800" height="100"></svg>

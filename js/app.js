@@ -17,12 +17,15 @@ var META;
 loadMetadata();
 
 function loadMetadata() {
+    jQuery('.loader').show();
     d3.json("/meta", function (data) {
         META = data;
+        jQuery('.loader').hide();
         jQuery('#layer-selection').empty();
         jQuery.each(Object.keys(META['datasets']), function(val, text) {
             jQuery('#layer-selection').append( jQuery('<option></option>').val(text).html(text))
         });
+        jQuery('#epoch-slider').attr({'max': META['epochs']});
     });
 }
 
@@ -32,7 +35,9 @@ function loadData(layername, callback) {
     let layer_shape = META['datasets'][layername]['shape'];
     let layername_url = layername.replace(/\//g, '__');
 
+    jQuery('.loader').show();
     d3.json("/data/" + layername_url, function (data) {
+        jQuery('.loader').hide();
         // Load JSON flatten array to numjs
         var njdata = nj.array(data);
         // Define shape
