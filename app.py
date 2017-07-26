@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify
 import numpy as np
 import h5py
 import os, glob, re
+import rapidjson
 import argparse
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -42,7 +43,7 @@ def _get_metadata():
     if not os.path.exists(log_dir):
         return {}
 
-    files = sorted(glob.glob(log_dir + "/*.hdf5"))
+    files = sorted(glob.glob(log_dir + "weights*.hdf5"))
     if len(files) == 0:
         return {}
 
@@ -74,12 +75,10 @@ def _get_metadata():
 #####################################
 # REST backend interface
 
-
 @app.route('/meta')
 def get_metadata():
     attributes = _get_metadata()
     return jsonify(attributes)
-
 
 @app.route('/data/<string:layername>')
 def get_data(layername):
@@ -102,7 +101,7 @@ def get_data(layername):
             weights = np.zeros((epochnr,) + data.shape)
         weights[i, ...] = data[:]
 
-    return jsonify(weights.flatten().round(decimals=4).tolist())
+    return rapidjson.dumps(weights.flatten().round(decimals=4).tolist())
 
 if __name__ == '__main__':
     app.run(debug=True)
