@@ -22,12 +22,6 @@ function loadMetadata() {
         META = data;
         jQuery('.loader').hide();
         jQuery('#layer-selection').empty();
-        if (META['epochs'] > 1) {
-           jQuery('#epoch-slider').show().attr({'max': META['epochs'] - 1});
-        }
-        else {
-            jQuery('#epoch-slider').hide().attr({value: 0});
-        }
         if (META['datasets'] && Object.keys(META['datasets']).length > 0) {
             jQuery.each(Object.keys(META['datasets']), function (val, text) {
                 jQuery('#layer-selection').append(jQuery('<option></option>').val(text).html(text))
@@ -53,10 +47,24 @@ function loadData(layername, callback) {
         var njdata = nj.array(data);
         // Define shape
         var shape = [epochs, ...layer_shape]; // shape size is 1+dim_tensor (epochs is the additional dimension)
+        shape = shape.filter(function(v) {return v !== 1});
+        njdata = njdata.reshape(shape);
         if (shape.length === 2) shape.push(1); // if 1D, expand dimension to have a 2D matrix
-        else if (shape.length !== 3) return alert('Only 2D data supported (Found [' + shape + '])');
+        else if (shape.length > 3) {
+            var dims = prompt("Please enter dimensions (slider, X, Y)", "0, 1, 2");
+            if (!dims) return alert('Only 2D data supported (Found [' + shape + '])');
+            var dims_list = dims.split(' ');
+            if (dims_list.length !== 3) return alert('Please select 3 dimensions for plotting')
+        }
         // Store in global var
         DATA = njdata.reshape(shape).tolist();
+        // Se slider
+        if (shape[0] > 1) {
+           jQuery('#epoch-slider').show().attr({'max': shape[0] - 1});
+        }
+        else {
+            jQuery('#epoch-slider').hide().attr({value: 0});
+        }
         // Call callback
         if (callback) callback();
     });
@@ -66,18 +74,77 @@ function render(epochNr) {
 
     //Grab current epoch data
     var epochData = DATA[epochNr];
+    var statData = calc_stats(epochData);
+    var idxs = statData.map(function (t) {return t[0]})
+    var mean = statData.map(function (t) {return t[1]})
+    var mean_low = statData.map(function (t) {return t[1] - 0.5 * t[2]})
+    var mean_up = statData.map(function (t) {return t[1] + 0.5 * t[2]})
+    //var variance = statData.map(function (t) {return t[2]})
 
     //The main plot using Plotly
+    var max_abs = nj.abs(nj.array(epochData)).max();
+    
     var heatmap = {
         z: epochData,
-        type: 'heatmap'
+        type: 'heatmap',
+        zmin: -max_abs,
+        zmax: max_abs
     };
 
-    var data = [heatmap];
-    Plotly.newPlot('heatmap-div', data);
+
+    var plot_lower = {
+        x: idxs,
+        y: mean_low ,
+        line: {width: 0},
+        marker: {color: "444"},
+        mode: "lines",
+        type: "scatter",
+        name: "Mean - std",
+        xaxis: 'x2',
+        yaxis: 'y2'
+    };
+
+    var plot = {
+        x: idxs,
+        y: mean,
+        xaxis: 'x2',
+        yaxis: 'y2',
+        fill: "tonexty",
+        fillcolor: "rgba(68, 68, 68, 0.3)",
+        line: {color: "rgb(31, 119, 180)"},
+        mode: "lines",
+        name: "Mean",
+        type: 'scatter'
+    };
+
+    var plot_upper = {
+        x: idxs,
+        y: mean_up ,
+        fill: "tonexty",
+        fillcolor: "rgba(68, 68, 68, 0.3)",
+        line: {width: 0},
+        marker: {color: "444"},
+        mode: "lines",
+        type: "scatter",
+        name: "Mean + std",
+        xaxis: 'x2',
+        yaxis: 'y2'
+    };
+
+
+    var layout = {
+        yaxis: {domain: [0.3, 1]},
+        xaxis2: {anchor: 'y2', range: [0, idxs.length - 1]},
+        yaxis2: {domain: [0, 0.25]},
+        showlegend: false
+    };
+
+    var data = [heatmap, plot_lower, plot, plot_upper];
+
+    Plotly.newPlot('heatmap-div', data, layout);
 
     //The graphs
-    plot_stats(epochData);
+    //plot_stats(epochData);
 }
 
 
@@ -189,7 +256,7 @@ function calc_stats(data) {
         }
         var variance = varsum / col.length;
 
-        stats.push([i, avg, variance]);
+        stats.push([i, avg, Math.sqrt(variance)]);
     }
 
 

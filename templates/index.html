@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>Data Visualization</title>
+    <title>TensorVis</title>
     <meta name="description" content="Test">
     <meta name="author" content="vscherer">
     <link href="{{ url_for('static', filename='style/main.css') }}" rel="stylesheet" type="text/css">
@@ -12,22 +12,28 @@
 
 {% include 'header.html' %}
 
+<body style="position: relative">
 
-<select id="layer-selection" onchange="set_layer()">
-    <option value="none">Loading metadata...</option>
-</select>
-<div style="text-align:center; width:100%">
-    <div class="loader" style="display:none"></div>
-</div>
+    <div class="main">
+        <div id="heatmap-div"></div>
+    </div>
 
-<output for="epoch-slider" id="slider-output">0</output>
-<input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
-<button type="button" id="play-button" onclick="play_pause()">Play</button>
+    <div class="sidebar">
+        <select id="layer-selection" onchange="set_layer()">
+            <option value="none">Loading metadata...</option>
+        </select>
+        <div style="text-align:center; width:100%">
+            <div class="loader" style="display:none"></div>
+        </div>
+        <output for="epoch-slider" id="slider-output">0</output>
+        <input type="range" id="epoch-slider" min="0" max="19" value="0" onchange="set_epoch()">
+        <button type="button" id="play-button" onclick="play_pause()">Play</button>
+    </div>
 
 
-<div id="heatmap-div"></div>
-<svg id="avgplot" width="800" height="100"></svg>
-<svg id="varplot" width="800" height="100"></svg>
+
+    <!--<svg id="avgplot" width="800" height="100"></svg>-->
+    <!--<svg id="varplot" width="800" height="100"></svg>-->
 
 </body>
 

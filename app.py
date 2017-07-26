@@ -16,6 +16,7 @@ args = parser.parse_args()
 # Configure the app
 app = Flask(__name__)
 log_dir = args.log_dir
+print (log_dir)
 
 @app.route('/')
 def hello_world():
@@ -44,7 +45,7 @@ def _get_metadata():
     if not os.path.exists(log_dir):
         return {}
 
-    files = sorted(glob.glob(log_dir + "weights*.hdf5"))
+    files = sorted(glob.glob(log_dir + "/*.hdf5"))
     if len(files) == 0:
         return {}
 
@@ -102,7 +103,7 @@ def get_data(layername):
             weights = np.zeros((epochnr,) + data.shape)
         weights[i, ...] = data[:]
 
-    return rapidjson.dumps(weights.flatten().round(decimals=4).tolist())
+    return rapidjson.dumps(weights.flatten().tolist())
 
 if __name__ == '__main__':
     app.run(debug=True)
