@@ -22,10 +22,21 @@ function loadMetadata() {
         META = data;
         jQuery('.loader').hide();
         jQuery('#layer-selection').empty();
-        jQuery.each(Object.keys(META['datasets']), function(val, text) {
-            jQuery('#layer-selection').append( jQuery('<option></option>').val(text).html(text))
-        });
-        jQuery('#epoch-slider').attr({'max': META['epochs']});
+        if (META['epochs'] > 1) {
+           jQuery('#epoch-slider').show().attr({'max': META['epochs'] - 1, value: 0});
+        }
+        else {
+            jQuery('#epoch-slider').hide().attr({value: 0});
+        }
+        if (META['datasets'] && Object.keys(META['datasets']).length > 0) {
+            jQuery.each(Object.keys(META['datasets']), function (val, text) {
+                jQuery('#layer-selection').append(jQuery('<option></option>').val(text).html(text))
+            });
+            set_layer();
+        }
+        else {
+            jQuery('#layer-selection').append(jQuery('<option></option>').html('No data found in folder!'))
+        }
     });
 }
 
@@ -41,8 +52,8 @@ function loadData(layername, callback) {
         // Load JSON flatten array to numjs
         var njdata = nj.array(data);
         // Define shape
-        var shape = [epochs, ...layer_shape];
-        if (shape.length === 2) shape.push(1); // make sure it is 2D
+        var shape = [epochs, ...layer_shape]; // shape size is 1+dim_tensor (epochs is the additional dimension)
+        if (shape.length === 2) shape.push(1); // if 1D, expand dimension to have a 2D matrix
         else if (shape.length !== 3) return alert('Only 2D data supported');
         // Store in global var
         DATA = njdata.reshape(shape).tolist();
