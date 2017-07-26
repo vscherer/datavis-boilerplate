@@ -4,6 +4,7 @@ import h5py
 import os, glob, re
 import rapidjson
 import argparse
+import rapidjson
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 parser = argparse.ArgumentParser(description='Process some integers.')

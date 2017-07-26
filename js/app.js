@@ -23,7 +23,7 @@ function loadMetadata() {
         jQuery('.loader').hide();
         jQuery('#layer-selection').empty();
         if (META['epochs'] > 1) {
-           jQuery('#epoch-slider').show().attr({'max': META['epochs'] - 1, value: 0});
+           jQuery('#epoch-slider').show().attr({'max': META['epochs'] - 1});
         }
         else {
             jQuery('#epoch-slider').hide().attr({value: 0});
@@ -54,7 +54,7 @@ function loadData(layername, callback) {
         // Define shape
         var shape = [epochs, ...layer_shape]; // shape size is 1+dim_tensor (epochs is the additional dimension)
         if (shape.length === 2) shape.push(1); // if 1D, expand dimension to have a 2D matrix
-        else if (shape.length !== 3) return alert('Only 2D data supported');
+        else if (shape.length !== 3) return alert('Only 2D data supported (Found [' + shape + '])');
         // Store in global var
         DATA = njdata.reshape(shape).tolist();
         // Call callback
@@ -68,11 +68,13 @@ function render(epochNr) {
     var epochData = DATA[epochNr];
 
     //The main plot using Plotly
-    var plotlyData = [{
+    var heatmap = {
         z: epochData,
         type: 'heatmap'
-    }];
-    Plotly.newPlot('heatmap-div', plotlyData);
+    };
+
+    var data = [heatmap];
+    Plotly.newPlot('heatmap-div', data);
 
     //The graphs
     plot_stats(epochData);
