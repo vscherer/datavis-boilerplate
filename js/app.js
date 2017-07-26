@@ -4,7 +4,6 @@ import * as d3 from 'd3'
 import jQuery from 'jquery';
 import Plotly from 'plotly.js'
 import nj from 'numjs';
-import jpickle from 'jpickle';
 superagentJsonapify(superagent);
 
 window.set_epoch = set_epoch;
