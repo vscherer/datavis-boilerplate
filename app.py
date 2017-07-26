@@ -3,11 +3,18 @@ import numpy as np
 import h5py
 import os, glob, re
 import rapidjson
+import argparse
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--log_dir',
+                    help='Path of the directory with HDF5 files',
+                    default=script_dir + "/demo/data/")
+args = parser.parse_args()
 
 # Configure the app
 app = Flask(__name__)
-script_dir = os.path.dirname(os.path.abspath(__file__))
-log_dir = script_dir + "/demo/data/"
+log_dir = args.log_dir
 
 @app.route('/')
 def hello_world():
@@ -33,9 +40,16 @@ def add_header(r):
 
 def _get_metadata():
     # List parameter files
+    if not os.path.exists(log_dir):
+        return {}
+
     files = sorted(glob.glob(log_dir + "weights*.hdf5"))
+    if len(files) == 0:
+        return {}
+
     attributes = {
         'epochs': len(files),
+        'files': files,
         'datasets': {},
         'groups': {}
     }
@@ -56,14 +70,14 @@ def _get_metadata():
                 attributes['groups'][name][key] = str(node.attrs[key])
 
     file.visititems(print_attrs)
-    return files, attributes
+    return attributes
 
 #####################################
 # REST backend interface
 
 @app.route('/meta')
 def get_metadata():
-    files, attributes = _get_metadata()
+    attributes = _get_metadata()
     return jsonify(attributes)
 
 @app.route('/data/<string:layername>')
@@ -74,7 +88,8 @@ def get_data(layername):
 
     layername = re.sub(r"__", "/", layername, 0)
 
-    files, attributes = _get_metadata()
+    attributes = _get_metadata()
+    files = attributes['files']
     epochnr = len(files)
 
     # Combine all the data
