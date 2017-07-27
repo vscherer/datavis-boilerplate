@@ -43,11 +43,10 @@ function loadData(layername, callback) {
     d3.json("/data/" + layername_url, function (data) {
         jQuery('.loader').hide();
         // Load JSON flatten array to numjs
-        var njdata = nj.array(data);
+        data = nj.array(data);
         // Define shape
         var shape = [epochs, ...layer_shape]; // shape size is 1+dim_tensor (epochs is the additional dimension)
-        shape = shape.filter(function(v) {return v !== 1});
-        njdata = njdata.reshape(shape);
+        shape = shape.filter(function(v) {return v !== 1});  // dimension squeeze
         if (shape.length === 2) shape.push(1); // if 1D, expand dimension to have a 2D matrix
         else if (shape.length > 3) {
             var dims = prompt("Please enter dimensions (slider, X, Y)", "0, 1, 2");
@@ -56,7 +55,7 @@ function loadData(layername, callback) {
             if (dims_list.length !== 3) return alert('Please select 3 dimensions for plotting')
         }
         // Store in global var
-        DATA = njdata.reshape(shape).tolist();
+        DATA = data.reshape(shape);
         // Se slider
         if (shape[0] > 1) {
            jQuery('#epoch-slider').show().attr({'max': shape[0] - 1});
@@ -71,29 +70,37 @@ function loadData(layername, callback) {
 
 function render(epochNr) {
 
+    epochNr = parseInt(epochNr);
+    var shape = DATA.shape;
+    var epochData = DATA.slice([epochNr, epochNr+1]).reshape(shape.slice(1));
+    var max_abs = nj.abs(epochData).max();
+
     //Grab current epoch data
-    var epochData = DATA[epochNr];
-    var statData = calc_stats(epochData);
-    var idxs = statData.map(function (t) {return t[0]});
-    var mean = statData.map(function (t) {return t[1]});
-    var mean_low = statData.map(function (t) {return t[1] - 0.5 * t[2]});
-    var mean_up = statData.map(function (t) {return t[1] + 0.5 * t[2]});
-    //var variance = statData.map(function (t) {return t[2]})
+    var statData = calc_stats(epochData.tolist());
+    var idxs_x = statData.map(function (t) {return t[0]});
+    var mean_x = statData.map(function (t) {return t[1]});
+    var mean_x_low = statData.map(function (t) {return t[1] - 0.5 * t[2]});
+    var mean_x_up = statData.map(function (t) {return t[1] + 0.5 * t[2]});
+    
+    statData = calc_stats(epochData.T.tolist());
+    var idxs_y = statData.map(function (t) {return t[0]});
+    var mean_y = statData.map(function (t) {return t[1]});
+    var mean_y_low = statData.map(function (t) {return t[1] - 0.5 * t[2]});
+    var mean_y_up = statData.map(function (t) {return t[1] + 0.5 * t[2]});
 
     //The main plot using Plotly
-    var max_abs = nj.abs(nj.array(epochData)).max();
     
     var heatmap = {
-        z: epochData,
+        z: epochData.tolist(),
         type: 'heatmap',
         zmin: -max_abs,
         zmax: max_abs
     };
 
 
-    var plot_lower = {
-        x: idxs,
-        y: mean_low ,
+    var plotx_lower = {
+        x: idxs_x,
+        y: mean_x_low ,
         line: {width: 0},
         marker: {color: "444"},
         mode: "lines",
@@ -103,9 +110,9 @@ function render(epochNr) {
         yaxis: 'y2'
     };
 
-    var plot = {
-        x: idxs,
-        y: mean,
+    var plotx = {
+        x: idxs_x,
+        y: mean_x,
         xaxis: 'x',
         yaxis: 'y2',
         fill: "tonexty",
@@ -116,9 +123,9 @@ function render(epochNr) {
         type: 'scatter'
     };
 
-    var plot_upper = {
-        x: idxs,
-        y: mean_up ,
+    var plotx_upper = {
+        x: idxs_x,
+        y: mean_x_up ,
         fill: "tonexty",
         fillcolor: "rgba(68, 68, 68, 0.3)",
         line: {width: 0},
@@ -129,20 +136,59 @@ function render(epochNr) {
         xaxis: 'x',
         yaxis: 'y2'
     };
+    
+    // ===================================
+    var ploty_lower = {
+        x: mean_y_low,
+        y: idxs_y ,
+        line: {width: 0},
+        marker: {color: "444"},
+        mode: "lines",
+        type: "scatter",
+        name: "Mean - std",
+        xaxis: 'x2',
+        yaxis: 'y'
+    };
 
+    var ploty = {
+        x: mean_y,
+        y: idxs_y,
+        xaxis: 'x2',
+        yaxis: 'y',
+        fill: "tonexty",
+        fillcolor: "rgba(68, 68, 68, 0.3)",
+        line: {color: "rgb(31, 119, 180)"},
+        mode: "lines",
+        name: "Mean",
+        type: 'scatter'
+    };
+
+    var ploty_upper = {
+        x: mean_y_up,
+        y: idxs_y ,
+        fill: "tonexty",
+        fillcolor: "rgba(68, 68, 68, 0.3)",
+        line: {width: 0},
+        marker: {color: "444"},
+        mode: "lines",
+        type: "scatter",
+        name: "Mean + std",
+        xaxis: 'x2',
+        yaxis: 'y'
+    };
+
+    
 
     var layout = {
         yaxis: {domain: [0.3, 1]},
         yaxis2: {domain: [0, 0.25]},
+        xaxis: {domain: [0.20, 1]},
+        xaxis2: {domain: [0, 0.15]},
         showlegend: false
     };
 
-    var data = [heatmap, plot_lower, plot, plot_upper];
-
+    var data = [heatmap, plotx_lower, plotx, plotx_upper, ploty_lower, ploty, ploty_upper];
     Plotly.newPlot('heatmap-div', data, layout);
-
-    //The graphs
-    //plot_stats(epochData);
 }
 
 
