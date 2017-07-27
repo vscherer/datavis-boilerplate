@@ -74,10 +74,10 @@ function render(epochNr) {
     //Grab current epoch data
     var epochData = DATA[epochNr];
     var statData = calc_stats(epochData);
-    var idxs = statData.map(function (t) {return t[0]})
-    var mean = statData.map(function (t) {return t[1]})
-    var mean_low = statData.map(function (t) {return t[1] - 0.5 * t[2]})
-    var mean_up = statData.map(function (t) {return t[1] + 0.5 * t[2]})
+    var idxs = statData.map(function (t) {return t[0]});
+    var mean = statData.map(function (t) {return t[1]});
+    var mean_low = statData.map(function (t) {return t[1] - 0.5 * t[2]});
+    var mean_up = statData.map(function (t) {return t[1] + 0.5 * t[2]});
     //var variance = statData.map(function (t) {return t[2]})
 
     //The main plot using Plotly
@@ -99,14 +99,14 @@ function render(epochNr) {
         mode: "lines",
         type: "scatter",
         name: "Mean - std",
-        xaxis: 'x2',
+        xaxis: 'x',
         yaxis: 'y2'
     };
 
     var plot = {
         x: idxs,
         y: mean,
-        xaxis: 'x2',
+        xaxis: 'x',
         yaxis: 'y2',
         fill: "tonexty",
         fillcolor: "rgba(68, 68, 68, 0.3)",
@@ -126,14 +126,13 @@ function render(epochNr) {
         mode: "lines",
         type: "scatter",
         name: "Mean + std",
-        xaxis: 'x2',
+        xaxis: 'x',
         yaxis: 'y2'
     };
 
 
     var layout = {
         yaxis: {domain: [0.3, 1]},
-        xaxis2: {anchor: 'y2', range: [0, idxs.length - 1]},
         yaxis2: {domain: [0, 0.25]},
         showlegend: false
     };
