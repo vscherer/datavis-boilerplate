@@ -15,14 +15,13 @@ args = parser.parse_args()
 
 # Configure the app
 app = Flask(__name__)
-log_dir = args.log_dir
+log_dir = args.log_dir #File path where data is stored
 print (log_dir)
 
 @app.route('/')
 def hello_world():
     """
     Serves the main template file.
-    You probably do NOT want to modify this.
     """
     return render_template('index.html')
 
@@ -31,7 +30,6 @@ def hello_world():
 def add_header(r):
     """
     Disable all caching.
-    You probably do NOT want to modify this.
     """
     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     r.headers["Pragma"] = "no-cache"
@@ -39,16 +37,20 @@ def add_header(r):
     r.headers['Cache-Control'] = 'public, max-age=0'
     return r
 
-
 def _get_metadata():
+    """
+    Calculate meta information about the main data and return it to client.
+    """
     # List parameter files
     if not os.path.exists(log_dir):
         return {}
 
+    #Grab all .hdf5 files in log_dir
     files = sorted(glob.glob(log_dir + "/*.hdf5"))
     if len(files) == 0:
         return {}
 
+    #Simple attributes
     attributes = {
         'epochs': len(files),
         'files': files,
@@ -79,11 +81,18 @@ def _get_metadata():
 
 @app.route('/meta')
 def get_metadata():
+    """
+    Flask route for loadMetadata()
+    """
     attributes = _get_metadata()
     return jsonify(attributes)
 
 @app.route('/data/<string:layername>')
 def get_data(layername):
+    """
+    Flask route for loadData()
+    All epochs sent at once to ensure smooth interaction when changing epochs.
+    """
 
     if not layername:
         return 404
@@ -103,6 +112,7 @@ def get_data(layername):
             weights = np.zeros((epochnr,) + data.shape)
         weights[i, ...] = data[:]
 
+    # Return as json
     return rapidjson.dumps(weights.flatten().tolist())
 
 if __name__ == '__main__':
