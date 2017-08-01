@@ -1,17 +1,110 @@
+/*
+This code performs a CSS reset to reduce browser inconsistency.
+
+   Source: http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/*End of CSS reset*/
+
+
+body {
+    margin: 0;
+}
+
+.topbar {
+    font-size: 1.8em;
+    font-weight: bold;
+    height: 50px;
+    padding-left: 30px;
+    background-color: #ff9d00; color: white;
+}
+
+.topbar h1 {
+    font-family: sans-serif;
+    height: 50px;
+    line-height: 50px;
+}
+
+.main {
+    padding-left: 300px;
+    padding-top: 50px;
+    height: calc(100vh - 100px);
+}
+
+#heatmap-div {
+    height: calc(100vh - 100px);
+}
+
+.sidebar {
+    position: absolute;
+    top: 50px;
+    width: 300px;
+    height: calc(100vh - 100px);
+    padding-top: 50px;
+    background: #fbfbfb;
+    border-right: 1px solid #d0d0d0;
+    text-align: center;
+}
+
 #epoch-slider {
-    margin-left: 30%;
-    margin-right: 30%;
-    width: 40%;
+    width: 80%;
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+#slider-output {
+    vertical-align: super;
+    font-size: 1.1em;;
 }
 
 #play-button {
     display: block;
     margin: auto;
-}
-
-#heatmap-div {
-    margin: auto;
-    max-width: 1000px;
 }
 
 #avgplot {
@@ -24,12 +117,25 @@
     margin: auto;
 }
 
-#slider-output {
-    margin-left: 30%;
-    width: 40px;
-}
-
 #layer-selection {
     display: block;
     margin: auto;
 }
+
+/*The loading icon*/
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 2s linear infinite;
+    display: inline-block;
+    margin: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "start": "concurrently --kill-others \"webpack --watch\" \"python app.py\""
+    "start": "concurrently --kill-others \"webpack --watch\" \"python3 app.py\""
   },
   "repository": "https://github.com/marcoancona/datavis-boilerplate",
   "author": "Marco Ancona",
@@ -21,7 +21,9 @@
   },
   "dependencies": {
     "d3": "^4.9.1",
+    "jpickle": "^0.4.1",
     "jquery": "^3.2.1",
+    "numjs": "^0.14.0",
     "plotly.js": "^1.27.1",
     "superagent": "^3.5.2",
     "superagent-jsonapify": "^1.4.4"
