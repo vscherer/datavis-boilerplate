@@ -8,7 +8,7 @@ window.set_epoch = set_epoch;
 window.set_layer = set_layer;
 window.play_pause = play_pause;
 var isPlaying = false;
-var DATA = [];
+var DATA;
 
 loadData("dense_1");
 render(0);
@@ -24,48 +24,23 @@ function loadData(layername) {
             DATA.push(matrix);
         });
     }
-
     console.log(DATA);
 }
 
 function render(epochNr) {
 
-    if (DATA.length <= epochNr) {
-        var loadInterval = setInterval(function () {
-            if (DATA.length > epochNr) {
-                clearInterval(loadInterval);
+    //Grab current epoch data
+    var epochData = DATA[epochNr];
 
-                //Grab current epoch data
-                var epochData = DATA[epochNr];
+    //The main plot using Plotly
+    var plotlyData = [{
+        z: epochData,
+        type: 'heatmap'
+    }];
+    Plotly.newPlot('heatmap-div', plotlyData);
 
-                //The main plot using Plotly
-                var plotlyData = [{
-                    z: epochData,
-                    type: 'heatmap'
-                }];
-                Plotly.newPlot('heatmap-div', plotlyData);
-
-                //The graphs
-                plot_stats(epochData);
-
-            } else {
-                console.log("not ready: Data.length = " + DATA.length);
-            }
-        }, 300);
-    } else {
-        //Grab current epoch data
-        var epochData = DATA[epochNr];
-
-        //The main plot using Plotly
-        var plotlyData = [{
-            z: epochData,
-            type: 'heatmap'
-        }];
-        Plotly.newPlot('heatmap-div', plotlyData);
-
-        //The graphs
-        plot_stats(epochData);
-    }
+    //The graphs
+    plot_stats(epochData);
 }
 
 
